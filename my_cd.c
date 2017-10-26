@@ -59,7 +59,7 @@ char		**ft_cd(char **env, char *arg)
 
 	if (!arg || !ft_strcmp(arg, "~") || !ft_strcmp(arg, "~/"))
 		path = get_pwd(env, "HOME");
-	else if (arg[0] == '-' && arg[1] == '\0')
+	else if (!ft_strcmp(arg, "-"))
 		path = get_pwd(env, "OLDPWD");
 	else if (arg[0] == '-' && arg[1] != '\0')
 	{

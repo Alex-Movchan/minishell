@@ -27,12 +27,30 @@ static char	*ft_accses(char **path, char *name)
 	return (NULL);
 }
 
+static char	*bin_in_dir(char *filename)
+{
+	if (access(filename, 0) == 0)
+	{
+		if (access(filename, 1) == -1)
+		{
+			ft_printf("{fd}Error permission denied: %{fd}s\n", 2, 2, filename);
+			return (NULL);
+		}
+		return (filename);
+	}
+	else
+		ft_printf("{fd}Error command not found: %{fd}s\n", 2, 2, filename);
+	return (NULL);
+}
+
 char		*call_binary(char **my_env, char *name)
 {
 	int		i;
 	char	**path;
 	char	*comandname;
 
+	if (ft_strchr(name, '/'))
+		return (bin_in_dir(name));
 	i = ft_search_line_env(my_env, "PATH");
 	if (i == ft_arrey_size(my_env))
 	{
