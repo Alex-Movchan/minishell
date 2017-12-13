@@ -31,6 +31,10 @@ char		**ft_setenv(char **env, char *str, char *src)
 	char	*s;
 	int		i;
 
+    if (!str || ! src)
+    {
+        ft_putstr_fd("\e[0;31msetenv: error arguments\e[0m\n", 2);
+    }
 	i = ft_search_line_env(env, str);
 	s = collect_an_argument(str, src);
 	if (i != ft_arrey_size(env))
@@ -42,4 +46,18 @@ char		**ft_setenv(char **env, char *str, char *src)
 	tmp = ft_arreyjoin(env, s);
 	ft_dell_arrey(env);
 	return (tmp);
+}
+
+void        ft_env(char **arg, t_term *term)
+{
+    int     i;
+    
+    i = -1;
+    if (arg[1])
+    {
+        ft_putstr_fd("\e[0;31menv: meny arguments\e[0m\n", 2);
+        return;
+    }
+    while (term->env[++i])
+        ft_putendl(term->env[i]);
 }

@@ -15,6 +15,8 @@ void		ft_dell_arrey(char **tmp)
 	int		i;
 
 	i = -1;
+    if (!tmp)
+        return;
 	while (tmp[++i] != NULL)
 		ft_strdel(&(tmp[i]));
 	free(tmp);

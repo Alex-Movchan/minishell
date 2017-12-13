@@ -130,7 +130,7 @@ int					tayp(char c);
 intmax_t			signed_size(va_list ap, t_srt *lst);
 uintmax_t			unsigned_size(va_list ap, t_srt *lst);
 char				*ft_getdouble(va_list ap, t_srt *lst);
-char				*getstr(va_list ap, t_srt *lst);
+char				*getstr1(va_list ap, t_srt *lst);
 char				*ft_cast_f(va_list ap, t_srt *lst);
 char				*ft_cast_e(va_list ap, t_srt *lst);
 char				*ft_cast_el(va_list ap, t_srt *lst);

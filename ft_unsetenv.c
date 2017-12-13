@@ -21,7 +21,7 @@ static char		**ft_dell_elem_env(char **menv, int nbr)
 	int		i;
 	int		j;
 
-	env = (char**)malloc(sizeof(char*) * (ft_arrey_size(menv)));
+	env = (char**)malloc(sizeof(char*) * (ft_arrey_size(menv) + 1));
 	i = -1;
 	j = 0;
 	while (menv[++i] != NULL)
@@ -35,13 +35,18 @@ static char		**ft_dell_elem_env(char **menv, int nbr)
 	return (env);
 }
 
-char	**ft_unsetenv(char **env, char *str)
+char	**ft_unsetenv(char **env, char **arg)
 {
 	int		i;
 
-	i = ft_search_line_env(env, str);
+    if (arg[2] || !arg[1])
+    {
+        ft_printf("{fd}{red}unsetenv: many arguments{eoc}\n", 2);
+        return (env);
+    }
+	i = ft_search_line_env(env, arg[1]);
 	if (i != ft_arrey_size(env))
 		return (ft_dell_elem_env(env, i));
-	ft_printf("{fd}Error %{fd}s Not faund\n", 2, 2, str, 2);
+	ft_printf("{fd}{red}Error %{fd}s Not faund{eoc}\n", 2, 2, arg[1], 2);
 	return (env);
 }

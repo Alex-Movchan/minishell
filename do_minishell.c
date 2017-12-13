@@ -1,65 +1,66 @@
+
 #include "minishell.h"
 
-static void		dell_histori(t_lin **lin)
+void	ft_do_binari(char *path, char **arg, t_term *term)
 {
-	t_lin	*lst;
-	t_lin	*leaks;
-
-	lst = *lin;
-	while (lst->prev)
-		lst = lst->prev;
-	while (lst)
+	if ((pid = fork()) < 0)
+		return;
+	if (pid == 0)
 	{
-		leaks = lst;
-		lst = lst->next;
-		if (lst)
-			lst->prev = NULL;
-		leaks->next = NULL;
-		ft_strdel(&(leaks->line));
-		free(leaks);
+        signal(SIGINT, SIG_DFL);
+		execve(path, arg, term->env);
 	}
-	*lin = NULL;
+	else
+		waitpid(pid, NULL, 0);
+	pid = 0;
 }
 
-static int		ft_search_argum_exit(char *str)
+void	ft_do_shell(char **tmp_line, t_term **term)
 {
 	int		i;
+	char	**arg;
+	char	*path;
 
-	i = 0;
-	while (str[i] && str[i] < 33)
-		i++;
-	if (ft_strncmp(str + i, "exit", 4))
-		return (1);
-	if (str[i + 5] > 33)
-		return (1);
-	if (str[i + 5] != '\0')
-		ft_printf("%{fd}s%{fd}s%{fd}s\n", 2, "minishell: exit: ",
-			2, str + (i + 5), 2, " numeric argument required");
-	return (0);
+	i = -1;
+	while (tmp_line[++i])
+	{
+		if (!(arg = ft_strsplit_quot(tmp_line[i])) || !arg[0])
+			continue;
+        if (!ft_strcmp(arg[0], "exit"))
+            exit(0);
+		else if (!ft_strcmp(arg[0], "env"))
+			ft_env(arg, *term);
+		else if (!ft_strcmp(arg[0], "unsetenv"))
+			(*term)->env = ft_unsetenv((*term)->env, arg);
+		else if (!ft_strcmp(arg[0], "setenv"))
+			(*term)->env = ft_setenv((*term)->env, arg[1], arg[2]);
+		else if (!ft_strcmp(arg[0], "cd"))
+			(*term)->env = ft_cd((*term)->env, arg, term);
+		else if ((path = call_binary((*term)->env, arg[0])))
+        {
+			ft_do_binari(path, arg, *term);
+            ft_strdel(&path);
+        }
+        ft_dell_arrey(arg);
+	}
+    ft_dell_arrey(tmp_line);
 }
 
-void	ft_do_shell(char *line, char **env)
+void	do_monishell(t_term *term)
 {
-	int		i;
-	char	**comand;
-
-}
-
-void	do_monishell(char **env)
-{
-	char	*line;
 	t_lin	*lin;
+	char	**arg;
 
 	lin = NULL;
 	while (1)
 	{
-		ft_putstr("$>");
-		if (!(line = read_line(env, &lin)))
+		tcsetattr(0, TCSANOW, &term->not_canon);
+		ft_putstr("\e[0;32m$>");
+		read_line(&lin, term);
+        ft_putstr("\e[0m");
+		tcsetattr(0, TCSANOW, &term->canon);
+		if (line[0] == '\0' || !(arg = ft_linesplit()))
 			continue ;
-		else if (!ft_search_argum_exit(line))
-			break ;
-		else
-			ft_do_shell(line, env);
+		ft_do_shell(arg, &term);
 	}
-	dell_histori(&lin);
 }

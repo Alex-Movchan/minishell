@@ -65,7 +65,7 @@ int					get_next_line(const int fd, char **line)
 	begin = new_list;
 	new_list = ft_audit_fd(&begin, fd);
 	while (!ft_strchr(new_list->content, '\n') &&
-			(res = read(fd, buff, BUFF_SIZE)))
+			(res = (int)read(fd, buff, BUFF_SIZE)))
 		new_list->content = add_liek(new_list->content, buff, res);
 	res = 0;
 	while (((char *)new_list->content)[res] &&

@@ -45,66 +45,43 @@ static void dell_file(t_file *lst, int len)
 	}
 }
 
-static char	*ft_search_line(char *c, char *line, t_file *file)
+static void ft_search_line(char *c, t_file *file, int i)
 {
-	char	*buf;
+	int		j;
 	char	*src;
-	char	*str;
-	char	*tab;
 
-	if ((buf = ft_strchrrev(line, ';')))
+	src = (char*)line + i;
+	j = (int)ft_strlen(src);
+	while (--j >= 0)
+		if (src[j] == '/')
+			break;
+	if (src[j] == '/')
 	{
-		if ((src = ft_strchrrev(buf, '/')))
-		{
-			str = ft_do_tab(file, src, c);
-			tab = ft_strndup(line, (ft_strlen(line) - ft_strlen(src)));
-		}
-		if ((src = ft_strchrrev(buf + 1, ' ')))
-		{
-			str = ft_do_tab(file, src, c);
-			tab = ft_strndup(line, (ft_strlen(line) - ft_strlen(src)));
-		}
-		else
-		{
-			str = ft_do_tab(file, buf + 1, c);
-			tab = ft_strndup(line, (ft_strlen(line) - ft_strlen(buf + 1)));
-		}
+		i += j + 1;
+		src = (char*)line + i;
 	}
-	else if ((buf = ft_strchrrev(line, ' ')))
-	{
-		if ((src = ft_strchrrev(buf, '/')))
-		{
-			str = ft_do_tab(file, src, c);
-			tab = ft_strndup(line, (ft_strlen(line) - ft_strlen(src)));
-		}
-		else
-		{
-			str = ft_do_tab(file, buf, c);
-			tab = ft_strndup(line, (ft_strlen(line) - ft_strlen(buf)));
-		}
-	}
-	else
-		return (ft_strdup(ft_do_tab(file, line, c)));
-	line = ft_strjoin(tab, str);
-	ft_strdel(&tab);
-	return (line);
+	src = ft_do_tab(file, src, c);
+	j = -1;
+	while (src[++j])
+		line[i++] = src[j];
+	caret = (int)ft_strlen((char*)line);
 }
 
-char		*auto_completion(char **env, char *line, char *c)
+void		auto_completion(t_term *term,  char *c)
 {
 	t_file *file;
 	int		len;
-	char	*buf;
+	int		i;
 
-	if ((file = get_file(line, env)))
+	i = caret;
+	if (line[0] == '\0' || line[caret] != '\0')
+		return ;
+	if ((file = get_file(term->env, &i)))
 	{
 		len = last_file(file);
-		buf = ft_search_line(c, line, file);
-		ft_strdel(&line);
-		line = buf;
+		ft_search_line(c, file, i);
 		dell_file(file, len);
 	}
 	else
 		ft_putchar('\a');
-	return (line);
 }

@@ -95,7 +95,7 @@ char	*ft_okrug_a(char *str)
 	char	a;
 	char	b;
 
-	i = ft_strlen(str);
+	i = (int)ft_strlen(str);
 	a = str[--i];
 	c = str[--i];
 	b = str[i];

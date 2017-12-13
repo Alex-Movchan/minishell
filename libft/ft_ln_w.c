@@ -21,5 +21,5 @@ int		ft_ln_w(char const *str, char c)
 	s = (char *)str;
 	while (*s != c && *s)
 		s++;
-	return (s - str);
+	return ((int)s - (int)str);
 }

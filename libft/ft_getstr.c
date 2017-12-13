@@ -29,7 +29,7 @@ char	*ft_getdouble(va_list ap, t_srt *lst)
 	else if (lst->letar == 'a')
 		return (ft_cast_a(ap, lst));
 	else
-		return (getstr(ap, lst));
+		return (getstr1(ap, lst));
 }
 
 char	*get_str(va_list ap, t_srt *lst)
@@ -44,7 +44,7 @@ char	*get_str(va_list ap, t_srt *lst)
 		return (ft_getdouble(ap, lst));
 }
 
-char	*getstr(va_list ap, t_srt *lst)
+char	*getstr1(va_list ap, t_srt *lst)
 {
 	if (lst->letar == 'p')
 		return (ft_strcast_p(ap, lst));

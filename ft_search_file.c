@@ -64,8 +64,6 @@ t_file			*ft_search_comand(char *line, char **env)
 	t_file	*file;
 	char	*str;
 
-	if (!line)
-		return (NULL);
 	str = line;
 	while (*str && *str < 33)
 		str++;

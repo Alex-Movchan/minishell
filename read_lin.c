@@ -1,14 +1,16 @@
+
 #include "minishell.h"
 
-static t_lin	*ft_add_line(char *line, t_lin *histor)
+static t_lin	*ft_add_line(t_lin *histor)
 {
 	t_lin	*lst;
 	t_lin	*leaks;
 
-	if (!line)
+	if (line[0] == '\0')
 		return (histor);
 	lst = (t_lin*)malloc(sizeof(t_lin));
-	lst->line = line;
+	lst->line = ft_strdup((char*)line);
+	lst->caret = (int)ft_strlen((char*)line);;
 	lst->flag = 0;
 	lst->prev = NULL;
 	lst->next = NULL;
@@ -30,126 +32,138 @@ static t_lin	*ft_add_line(char *line, t_lin *histor)
 	return (lst);
 }
 
-static char		*add_in_line(char *line, char c)
+void    ft_delete()
 {
-	char	*src;
+    int j;
+    
+    ft_termcap_do("sc");
+    ft_termcap_do("cd");
+    j = caret - 1;
+    while (line[++j])
+        line[j] = line[j + 1];
+    ft_putstr(line + caret);
+    ft_termcap_do("rc");
+
+}
+
+static void		ft_dell_lastchr()
+{
+	int j;
+
+	if (caret > 0)
+	{
+        ft_clearline();
+		j = caret - 2;
+		while (line[++j])
+			line[j] = line[j + 1];
+        caret--;
+        ft_putstr(line);
+        ft_return_cursor(size_colum(), (int)ft_strlen(line), caret, line);
+	}
+}
+
+//static void        ft_putlinequot(char c)
+//{
+//    if (c == '"')
+//        ft_putstr("dquote>");
+//    else if (c == '\'')
+//        ft_putstr("quote>");
+//}
+
+
+int			size_colum(void)
+{
+    struct winsize	size;
+    
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
+    return ((int)size.ws_col);
+}
+
+static void		ft_addinline(char c)
+{
 	int		i;
-
-	i = -1;
-	if (line)
-	{
-		src = ft_strnew(ft_strlen(line) + 1);
-		while (line[++i])
-			src[i] = line[i];
-		src[i++] = c;
-		src[i] = '\0';
-		ft_strdel(&line);
-	}
-	else
-	{
-		src = ft_strnew(1);
-		src[++i] = c;
-		src[++i] = '\0';
-	}
-	return (src);
+	int		j;
+	char	tmp;
+	char	next;
+    
+    if (line[caret] == '\0')
+    {
+        line[caret++] = c;
+        return (ft_putchar(c));
+    }
+    i = (int)ft_strlen((char*)line);
+    j = caret;
+    tmp = line[j];
+    while (j < i)
+    {
+        next = line[j + 1];
+        line[j + 1] = tmp;
+        tmp = next;
+        j++;
+    }
+    line[caret] = c;
+    ft_termcap_do("cd");
+    ft_putstr(line + caret);
+    ft_return_cursor(size_colum(), (int)ft_strlen(line), ++caret, line);
 }
 
-static char		*ft_dell_lastchr(char *str)
+//static int        ft_quota(char quot, char *c, int size)
+//{
+//
+//    ft_addinline(quot);
+//    while (read(STDIN_FILENO, c, 1) > 0)
+//    {
+//        if (*c == quot)
+//            break;
+//        if (ft_isprint((int) *c) || *c == '\n')
+//        {
+//            caret += size;
+//            ft_addinline(*c);
+//            caret -= size;
+//        }
+//        if (*c == '\n')
+//        {
+//            ft_putlinequot(quot);
+//            size += caret;
+//            caret = 0;
+//        }
+//        if (*c == 127)
+//            ft_dell_lastchr();
+//    }
+//    return(size + caret);
+//}
+
+void			read_line(t_lin **lst, t_term *term)
 {
-	char	*src;
-
-	if (!str)
-		return (NULL);
-
-	ft_back_print(1);
-	//ft_putstr(tgetstr("dc", NULL));
-	if (str[1] == '\0')
-		src = NULL;
-	else
-		src = ft_strndup(str, ft_strlen((str) + 1));
-	ft_strdel(&str);
-	return (src);
-}
-
-void			ft_put_quot(char quot)
-{
-	if (quot == '"')
-		ft_putstr("dquote>");
-	else if (quot == '\'')
-		ft_putstr("quote>");
-}
-
-static char		*ft_get_quot(char *line, char quot)
-{
-	char	*src;
-	char	*leaks;
 	char	c;
+	int		size;
 
-	ft_put_quot(quot);
-	src = NULL;
+	caret = 0;
+	size = 0;
+	ft_bzero((void*)line, MAX_LINE_SIZE);
 	while (read(STDIN_FILENO, &c, 1) > 0)
 	{
-		if (ft_isprint((int)c) || c == '\n')
-		{
-			ft_putchar(c);
-			src = add_in_line(src, c);
-		}
-		if (c == quot)
-		{
-			leaks = line;
-			line = ft_strjoin(line, src);
-			ft_strdel(&leaks);
-			ft_strdel(&src);
-			break ;
-		}
-		if (c == 127)
-			src = ft_dell_lastchr(src);
-		if (c == '\n')
-		{
-			leaks = line;
-			line = ft_strjoin(line, src);
-			ft_strdel(&leaks);
-			ft_strdel(&src);
-			ft_put_quot(quot);
-		}
-	}
-	return (line);
-}
-
-char			*read_line(char **env, t_lin **lst)
-{
-	char	*left;
-	char	c;
-	char	quot;
-
-	left = NULL;
-	quot = 0;
-	while (read(STDIN_FILENO, &c, 1) > 0)
-	{
-		if (c == 127)
-			left = ft_dell_lastchr(left);
 		if (c == '\t')
-			left = auto_completion(env, left, &c);
-		if (quot == 0 && (c == '"' || c == '\''))
-				quot = c;
+			auto_completion(term, &c);
+		if (c == 127)
+			ft_dell_lastchr();
 		if (c == 27)
-			left = ft_arrows(lst, left);
+			ft_arrows(lst);
+//		if (c == '\'' || c == '"')
+//			size = ft_quota(c, &c, size);
 		if (c == '\n')
 		{
-			ft_putchar(c);
-			if (quot == 0)
-			{
-				*lst = ft_add_line(left, *lst);
-				return (left);
-			}
-			left = ft_get_quot(add_in_line(left, c), quot);
-			quot = 0;
+            ft_end_cursor();
+			ft_putchar('\n');
+			caret += size;
+			*lst = ft_add_line(*lst);
+			return;
 		}
-		if (ft_isprint((int)c))
+		if (ft_isprint((int) c))
 		{
-			ft_putchar(c);
-			left = add_in_line(left, c);
+			caret += size;
+			ft_addinline(c);
+			caret -= size;
 		}
 	}
-	return (NULL);
 }
